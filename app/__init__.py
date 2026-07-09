@@ -1,9 +1,13 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+@app.route("/")
+def index():
+    return jsonify({"message": "Yetu Grocer Store API"})
+
 def create_app():
     app = Flask(__name__)
-    CORS(app, origins=["http://localhost:3000"])
+    CORS(app, origins=["http://localhost:5000"])
 
     @app.route("/api/health")
     def health():

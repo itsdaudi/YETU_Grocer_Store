@@ -8,5 +8,5 @@ Flask REST API for the Yetu Grocer Store project.
 2. `pipenv shell`
 3. `python run.py`
 
-API runs at `http://localhost:5555`
+API runs at `http://localhost:5000`
 EOF
