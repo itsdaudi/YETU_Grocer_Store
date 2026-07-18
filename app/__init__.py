@@ -2,8 +2,10 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
 from app.models import db
+from flask_jwt_extended import JWTManager
 
 migrate = Migrate()
+jwt = JWTManager()
 
 
 def create_app():
@@ -14,6 +16,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
 
     CORS(app, origins=["http://localhost:5173"])
 
