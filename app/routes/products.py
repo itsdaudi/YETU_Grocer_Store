@@ -3,6 +3,8 @@
 
 from flask import Blueprint, request, jsonify
 from app.models.category import Category
+from app.models.product import Product
+
 
 products_bp = Blueprint("products", __name__, url_prefix="/api")
 
@@ -16,4 +18,36 @@ def get_categories():
             {"id": c.id, "name": c.name, "slug": c.slug}
             for c in categories
         ]
-    }), 200
+    }), 200  
+
+@products_bp.route("/products", methods=["GET"])
+def get_products():
+    # pagination params, with sensible defaults
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 12, type=int)
+
+    query = Product.query
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    products = pagination.items
+
+    return jsonify({
+        "products": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "category_id": p.category_id,
+                "category": p.category.name,  # uses the backref we set up earlier
+                "price": float(p.price),
+                "sale_price": float(p.sale_price) if p.sale_price else None,
+                "unit": p.unit,
+                "image_url": p.image_url,
+                "stock_quantity": p.stock_quantity
+            }
+            for p in products
+        ],
+        "total": pagination.total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "total_pages": pagination.pages
+    }), 200    
