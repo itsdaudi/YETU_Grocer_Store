@@ -50,4 +50,57 @@ def get_products():
         "page": pagination.page,
         "per_page": pagination.per_page,
         "total_pages": pagination.pages
-    }), 200    
+    }), 200 
+    
+@products_bp.route("/products", methods=["GET"])
+def get_products():
+    # pagination params
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 12, type=int)
+
+    # filter/search/sort params
+    category_slug = request.args.get("category")
+    search_term = request.args.get("search")
+    sort = request.args.get("sort")  # e.g. "price_asc", "price_desc"
+
+    query = Product.query
+
+    # filter by category, if provided
+    if category_slug and category_slug.lower() != "all":
+        query = query.join(Category).filter(Category.slug == category_slug)
+
+    # search by product name, case-insensitive partial match
+    if search_term:
+        query = query.filter(Product.name.ilike(f"%{search_term}%"))
+
+    # sorting
+    if sort == "price_asc":
+        query = query.order_by(Product.price.asc())
+    elif sort == "price_desc":
+        query = query.order_by(Product.price.desc())
+    # if sort is missing or "featured", leave default order (insertion order)
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    products = pagination.items
+
+    return jsonify({
+        "products": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "category_id": p.category_id,
+                "category": p.category.name,
+                "price": float(p.price),
+                "sale_price": float(p.sale_price) if p.sale_price else None,
+                "unit": p.unit,
+                "image_url": p.image_url,
+                "stock_quantity": p.stock_quantity
+            }
+            for p in products
+        ],
+        "total": pagination.total,
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "total_pages": pagination.pages
+    }), 200
+
