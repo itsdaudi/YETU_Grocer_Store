@@ -74,4 +74,22 @@ def login():
             "name": user.name,
             "email": user.email
         }
-    }), 200    
+    }), 200  
+
+@auth_bp.route("/me", methods=["GET"])
+@jwt_required()
+def me():
+    # get_jwt_identity() pulls the user id we stored in the token at login/signup
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email
+        }
+    }), 200
