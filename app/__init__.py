@@ -2,13 +2,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
 from app.models import db
-from flask_sqlalchemy import SQLAlchemy
-from app.models.user import User
-from app.models.category import Category
-
 
 migrate = Migrate()
-db = SQLAlchemy()
 
 
 def create_app():
