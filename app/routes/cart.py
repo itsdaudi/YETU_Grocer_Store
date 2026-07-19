@@ -135,4 +135,19 @@ def update_cart_item(item_id):
     item.quantity = quantity
     db.session.commit()
 
-    return jsonify(serialize_cart(cart)), 200    
+    return jsonify(serialize_cart(cart)), 200 
+
+@cart_bp.route("/items/<int:item_id>", methods=["DELETE"])
+@jwt_required()
+def delete_cart_item(item_id):
+    user_id = get_jwt_identity()
+    cart = get_or_create_cart(user_id)
+
+    item = CartItem.query.filter_by(id=item_id, cart_id=cart.id).first()
+    if not item:
+        return jsonify({"error": "Cart item not found"}), 404
+
+    db.session.delete(item)
+    db.session.commit()
+
+    return jsonify(serialize_cart(cart)), 200  
