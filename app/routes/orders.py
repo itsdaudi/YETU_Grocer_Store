@@ -163,5 +163,65 @@ def get_order_detail(order_id):
         }
     }), 200 
 
-    
-      
+
+@orders_bp.route("/<int:order_id>/reorder", methods=["POST"])
+@jwt_required()
+def reorder(order_id):
+    user_id = get_jwt_identity()
+
+    # only allow reordering an order that actually belongs to this user
+    order = Order.query.filter_by(id=order_id, user_id=user_id).first()
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    # get (or create) the user's current cart to add items into
+    cart = Cart.query.filter_by(user_id=user_id).first()
+    if not cart:
+        cart = Cart(user_id=user_id)
+        db.session.add(cart)
+        db.session.flush()  # assigns cart.id before we use it below
+
+    added = []     # product names successfully added back to the cart
+    skipped = []   # product names skipped because they're fully out of stock
+
+    for item in order.items:
+        product = item.product
+
+        # skip products that no longer have any stock at all
+        if product.stock_quantity < 1:
+            skipped.append(product.name)
+            continue
+
+        # don't re-add more than what's currently in stock, even if the
+        # original order had a higher quantity
+        quantity_to_add = min(item.quantity, product.stock_quantity)
+
+        # check if this product is already sitting in the cart
+        existing_cart_item = CartItem.query.filter_by(
+            cart_id=cart.id, product_id=product.id
+        ).first()
+
+        if existing_cart_item:
+            # merge quantities instead of creating a duplicate row,
+            # still capped at available stock
+            existing_cart_item.quantity = min(
+                existing_cart_item.quantity + quantity_to_add,
+                product.stock_quantity
+            )
+        else:
+            # no existing row for this product — create a new cart item
+            db.session.add(CartItem(
+                cart_id=cart.id,
+                product_id=product.id,
+                quantity=quantity_to_add
+            ))
+
+        added.append(product.name)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Items added to cart",
+        "added": added,
+        "skipped_out_of_stock": skipped
+    }), 200      
