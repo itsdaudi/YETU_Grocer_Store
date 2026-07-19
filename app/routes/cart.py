@@ -68,3 +68,45 @@ def get_cart():
     cart = get_or_create_cart(user_id)
 
     return jsonify(serialize_cart(cart)), 200
+
+@cart_bp.route("/items", methods=["POST"])
+@jwt_required()
+def add_cart_item():
+    user_id = get_jwt_identity()
+    cart = get_or_create_cart(user_id)
+
+    data = request.get_json() or {}
+    product_id = data.get("product_id")
+    quantity = data.get("quantity", 1)
+
+    if not product_id:
+        return jsonify({"error": "product_id is required"}), 400
+
+    if not isinstance(quantity, int) or quantity < 1:
+        return jsonify({"error": "quantity must be a positive integer"}), 400
+
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    # check if this product is already in the cart
+    existing_item = CartItem.query.filter_by(cart_id=cart.id, product_id=product_id).first()
+
+    if existing_item:
+        new_quantity = existing_item.quantity + quantity
+        if new_quantity > product.stock_quantity:
+            return jsonify({
+                "error": f"Only {product.stock_quantity} of {product.name} available in stock"
+            }), 400
+        existing_item.quantity = new_quantity
+    else:
+        if quantity > product.stock_quantity:
+            return jsonify({
+                "error": f"Only {product.stock_quantity} of {product.name} available in stock"
+            }), 400
+        new_item = CartItem(cart_id=cart.id, product_id=product_id, quantity=quantity)
+        db.session.add(new_item)
+
+    db.session.commit()
+
+    return jsonify(serialize_cart(cart)), 201
