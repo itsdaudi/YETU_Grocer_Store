@@ -47,3 +47,16 @@ def create_app():
         return jsonify({"status": "ok"})
 
     return app
+
+    # --- consistent JSON error handlers ---
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({"error": "Resource not found"}), 404
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({"error": "Bad request"}), 400
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        return jsonify({"error": "Something went wrong on our end"}), 500
