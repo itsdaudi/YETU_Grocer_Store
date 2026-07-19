@@ -110,3 +110,29 @@ def add_cart_item():
     db.session.commit()
 
     return jsonify(serialize_cart(cart)), 201
+
+@cart_bp.route("/items/<int:item_id>", methods=["PATCH"])
+@jwt_required()
+def update_cart_item(item_id):
+    user_id = get_jwt_identity()
+    cart = get_or_create_cart(user_id)
+
+    item = CartItem.query.filter_by(id=item_id, cart_id=cart.id).first()
+    if not item:
+        return jsonify({"error": "Cart item not found"}), 404
+
+    data = request.get_json() or {}
+    quantity = data.get("quantity")
+
+    if not isinstance(quantity, int) or quantity < 1:
+        return jsonify({"error": "quantity must be a positive integer"}), 400
+
+    if quantity > item.product.stock_quantity:
+        return jsonify({
+            "error": f"Only {item.product.stock_quantity} of {item.product.name} available in stock"
+        }), 400
+
+    item.quantity = quantity
+    db.session.commit()
+
+    return jsonify(serialize_cart(cart)), 200    
