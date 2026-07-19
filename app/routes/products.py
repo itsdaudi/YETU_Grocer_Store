@@ -65,3 +65,28 @@ def get_products():
         "per_page": pagination.per_page,
         "total_pages": pagination.pages
     }), 200
+
+@products_bp.route("/products/<int:product_id>", methods=["GET"])
+def get_product_detail(product_id):
+    product = Product.query.get(product_id)
+
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    return jsonify({
+        "product": {
+            "id": product.id,
+            "name": product.name,
+            "category_id": product.category_id,
+            "category": product.category.name,
+            "price": float(product.price),
+            "sale_price": float(product.sale_price) if product.sale_price else None,
+            "unit": product.unit,
+            "image_url": product.image_url,
+            "description": product.description,
+            "nutrition_info": product.nutrition_info,
+            "stock_quantity": product.stock_quantity
+        }
+    }), 200    
+
+    
