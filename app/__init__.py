@@ -5,6 +5,8 @@ from flask_jwt_extended import JWTManager
 from app.models import db
 from app.routes.auth import auth_bp
 from app.routes.products import products_bp
+from app.routes.cart import cart_bp
+
 
 migrate = Migrate()
 jwt = JWTManager()
@@ -26,6 +28,8 @@ def create_app():
     # register blueprints — this is what actually wires up /api/auth/* routes
     app.register_blueprint(auth_bp)
     app.register_blueprint(products_bp)
+    app.register_blueprint(cart_bp)
+
     @app.route("/")
     def index():
         return jsonify({"message": "Yetu Grocer Store API"})
