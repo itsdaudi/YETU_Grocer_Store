@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -20,7 +21,9 @@ def create_app():
 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///yetu.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["JWT_SECRET_KEY"] = "change-this-to-a-real-secret-later"  # temporary for dev
+    app.config["JWT_SECRET_KEY"] = os.environ.get(
+    "JWT_SECRET_KEY", "dev-only-fallback-do-not-use-in-production"
+)
 
     db.init_app(app)
     migrate.init_app(app, db)
