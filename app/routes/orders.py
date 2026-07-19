@@ -99,3 +99,69 @@ def create_order():
             "created_at": order.created_at.isoformat()
         }
     }), 201
+
+@orders_bp.route("", methods=["GET"])
+@jwt_required()
+def get_orders():
+    user_id = get_jwt_identity()
+    status_filter = request.args.get("status")
+
+    query = Order.query.filter_by(user_id=user_id)
+
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+
+    orders = query.order_by(Order.created_at.desc()).all()
+
+    return jsonify({
+        "orders": [
+            {
+                "id": o.id,
+                "status": o.status,
+                "subtotal": float(o.subtotal),
+                "delivery_fee": float(o.delivery_fee),
+                "total": float(o.total),
+                "item_count": len(o.items),
+                "created_at": o.created_at.isoformat()
+            }
+            for o in orders
+        ]
+    }), 200
+
+@orders_bp.route("/<int:order_id>", methods=["GET"])
+@jwt_required()
+def get_order_detail(order_id):
+    user_id = get_jwt_identity()
+
+    order = Order.query.filter_by(id=order_id, user_id=user_id).first()
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    return jsonify({
+        "order": {
+            "id": order.id,
+            "status": order.status,
+            "subtotal": float(order.subtotal),
+            "delivery_fee": float(order.delivery_fee),
+            "total": float(order.total),
+            "created_at": order.created_at.isoformat(),
+            "address": {
+                "label": order.address.label,
+                "street": order.address.street,
+                "city": order.address.city
+            },
+            "items": [
+                {
+                    "product_id": item.product_id,
+                    "name": item.product.name,
+                    "image_url": item.product.image_url,
+                    "quantity": item.quantity,
+                    "price_at_purchase": float(item.price_at_purchase)
+                }
+                for item in order.items
+            ]
+        }
+    }), 200 
+
+    
+      
