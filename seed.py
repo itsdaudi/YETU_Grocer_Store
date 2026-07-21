@@ -47,7 +47,7 @@ with app.app_context():
                 image_url="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400"),
         Product(category_id=categories["fruits"].id, name="Mixed Berries",
                 price=6.99, sale_price=5.49, unit="per 300g", stock_quantity=25,
-                image_url="https://images.unsplash.com/photo-1563746924237-f4471d3a0f83?w=400"),
+                image_url="https://picsum.photos/seed/berries/400/400"),
 
         Product(category_id=categories["dairy"].id, name="Whole Milk",
                 price=1.89, sale_price=None, unit="per liter", stock_quantity=70,
@@ -61,7 +61,7 @@ with app.app_context():
 
         Product(category_id=categories["bakery"].id, name="Sourdough Bread",
                 price=4.50, sale_price=None, unit="per loaf", stock_quantity=20,
-                image_url="https://images.unsplash.com/photo-1585478259715-4d3a5d3bb4c5?w=400"),
+                image_url="https://picsum.photos/seed/sourdough/400/400"),
 
         Product(category_id=categories["meat"].id, name="Chicken Breast",
                 price=6.99, sale_price=None, unit="per 500g", stock_quantity=45,
