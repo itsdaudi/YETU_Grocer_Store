@@ -28,51 +28,51 @@ with app.app_context():
     }
 
     db.session.add_all(categories.values())
-    db.session.commit()  # commit now so categories get real IDs before we link products
+    db.session.commit()
 
-    # --- Products (matches the Figma design's sample data) ---
+    # --- Products with real image URLs (Unsplash direct links) ---
     products = [
         Product(category_id=categories["vegetables"].id, name="Organic Broccoli",
                 price=3.29, sale_price=2.49, unit="per bunch", stock_quantity=50,
-                image_url="https://example.com/broccoli.jpg"),
+                image_url="https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?w=400"),
         Product(category_id=categories["vegetables"].id, name="Cherry Tomatoes",
                 price=2.99, sale_price=None, unit="per 250g", stock_quantity=40,
-                image_url="https://example.com/tomatoes.jpg"),
+                image_url="https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=400"),
 
         Product(category_id=categories["fruits"].id, name="Fuji Apples",
                 price=3.99, sale_price=None, unit="per kg", stock_quantity=60,
-                image_url="https://example.com/apples.jpg"),
+                image_url="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400"),
         Product(category_id=categories["fruits"].id, name="Avocado",
                 price=1.49, sale_price=None, unit="each", stock_quantity=80,
-                image_url="https://example.com/avocado.jpg"),
+                image_url="https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400"),
         Product(category_id=categories["fruits"].id, name="Mixed Berries",
                 price=6.99, sale_price=5.49, unit="per 300g", stock_quantity=25,
-                image_url="https://example.com/berries.jpg"),
+                image_url="https://images.unsplash.com/photo-1563746924237-f4471d3a0f83?w=400"),
 
         Product(category_id=categories["dairy"].id, name="Whole Milk",
                 price=1.89, sale_price=None, unit="per liter", stock_quantity=70,
-                image_url="https://example.com/milk.jpg"),
+                image_url="https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400"),
         Product(category_id=categories["dairy"].id, name="Greek Yogurt",
                 price=3.99, sale_price=3.29, unit="per 500g", stock_quantity=35,
-                image_url="https://example.com/yogurt.jpg"),
+                image_url="https://images.unsplash.com/photo-1584278860047-22db9ff82bed?w=400"),
         Product(category_id=categories["dairy"].id, name="Cheddar Cheese",
                 price=4.99, sale_price=None, unit="per 200g", stock_quantity=30,
-                image_url="https://example.com/cheese.jpg"),
+                image_url="https://images.unsplash.com/photo-1618164436241-4473940d1f5c?w=400"),
 
         Product(category_id=categories["bakery"].id, name="Sourdough Bread",
                 price=4.50, sale_price=None, unit="per loaf", stock_quantity=20,
-                image_url="https://example.com/sourdough.jpg"),
+                image_url="https://images.unsplash.com/photo-1585478259715-4d3a5d3bb4c5?w=400"),
 
         Product(category_id=categories["meat"].id, name="Chicken Breast",
                 price=6.99, sale_price=None, unit="per 500g", stock_quantity=45,
-                image_url="https://example.com/chicken.jpg"),
+                image_url="https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400"),
 
         Product(category_id=categories["beverages"].id, name="Orange Juice",
                 price=3.49, sale_price=None, unit="per liter", stock_quantity=55,
-                image_url="https://example.com/oj.jpg"),
+                image_url="https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400"),
         Product(category_id=categories["beverages"].id, name="Almond Milk",
                 price=2.99, sale_price=None, unit="per liter", stock_quantity=40,
-                image_url="https://example.com/almond-milk.jpg"),
+                image_url="https://images.unsplash.com/photo-1600718374662-0483d2b9da44?w=400"),
     ]
 
     db.session.add_all(products)
