@@ -11,6 +11,7 @@ flask-cors = "*"
 flask-bcrypt = "*"
 python-dotenv = "*"
 flask-migrate = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
