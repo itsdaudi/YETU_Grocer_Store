@@ -33,7 +33,9 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    CORS(app, origins=["http://localhost:5173"])
+    CORS(app, origins=["http://localhost:5173"
+                       "https://yetu-grocer-store-frontend.vercel.app"
+                       ])
 
     # register blueprints — this is what actually wires up /api/auth/* routes
     app.register_blueprint(auth_bp)
