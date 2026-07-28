@@ -33,7 +33,7 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    CORS(app, origins=["http://localhost:5173"
+    CORS(app, origins=["http://localhost:5173",
                        "https://yetu-grocer-store-frontend.vercel.app"
                        ])
 
