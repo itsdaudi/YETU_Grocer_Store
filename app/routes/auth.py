@@ -43,7 +43,8 @@ def signup():
         "user": {
             "id": new_user.id,
             "name": new_user.name,
-            "email": new_user.email
+            "email": new_user.email,
+            "role": new_user.role
         }
     }), 201
 
@@ -72,7 +73,8 @@ def login():
         "user": {
             "id": user.id,
             "name": user.name,
-            "email": user.email
+            "email": user.email,
+            "role": user.role
         }
     }), 200  
 
@@ -90,6 +92,7 @@ def me():
         "user": {
             "id": user.id,
             "name": user.name,
-            "email": user.email
+            "email": user.email,
+            "role": user.role
         }
     }), 200
