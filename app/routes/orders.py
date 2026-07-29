@@ -2,6 +2,7 @@
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.utils.admin_required import admin_required
 
 from app.models import db
 from app.models.cart import Cart, CartItem
@@ -224,4 +225,61 @@ def reorder(order_id):
         "message": "Items added to cart",
         "added": added,
         "skipped_out_of_stock": skipped
-    }), 200      
+    }), 200 
+
+@orders_bp.route("/admin/all", methods=["GET"])
+@admin_required
+def get_all_orders():
+    status_filter = request.args.get("status")
+
+    query = Order.query
+
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+
+    orders = query.order_by(Order.created_at.desc()).all()
+
+    return jsonify({
+        "orders": [
+            {
+                "id": o.id,
+                "customer_name": o.user.name,
+                "customer_email": o.user.email,
+                "status": o.status,
+                "subtotal": float(o.subtotal),
+                "delivery_fee": float(o.delivery_fee),
+                "total": float(o.total),
+                "item_count": len(o.items),
+                "created_at": o.created_at.isoformat()
+            }
+            for o in orders
+        ]
+    }), 200
+
+
+@orders_bp.route("/admin/<int:order_id>/status", methods=["PATCH"])
+@admin_required
+def update_order_status(order_id):
+    order = Order.query.get(order_id)
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    data = request.get_json() or {}
+    new_status = data.get("status")
+
+    valid_statuses = ["processing", "packed", "in_transit", "delivered"]
+    if new_status not in valid_statuses:
+        return jsonify({
+            "error": f"status must be one of: {', '.join(valid_statuses)}"
+        }), 400
+
+    order.status = new_status
+    db.session.commit()
+
+    return jsonify({
+        "message": "Order status updated",
+        "order": {
+            "id": order.id,
+            "status": order.status
+        }
+    }), 200    
