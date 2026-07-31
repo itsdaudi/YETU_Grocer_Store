@@ -4,6 +4,8 @@
 from flask import Blueprint, request, jsonify
 from app.models.category import Category
 from app.models.product import Product
+from app.utils.admin_required import admin_required
+from app.models import db
 
 products_bp = Blueprint("products", __name__, url_prefix="/api")
 
@@ -89,4 +91,43 @@ def get_product_detail(product_id):
         }
     }), 200    
 
-    
+
+@products_bp.route("/admin/products", methods=["POST"])
+@admin_required
+def create_product():
+    data = request.get_json() or {}
+
+    name = data.get("name")
+    category_id = data.get("category_id")
+    price = data.get("price")
+
+    if not name or not category_id or price is None:
+        return jsonify({"error": "name, category_id, and price are required"}), 400
+
+    category = Category.query.get(category_id)
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+
+    new_product = Product(
+        name=name,
+        category_id=category_id,
+        price=price,
+        sale_price=data.get("sale_price"),
+        unit=data.get("unit"),
+        image_url=data.get("image_url"),
+        description=data.get("description"),
+        nutrition_info=data.get("nutrition_info"),
+        stock_quantity=data.get("stock_quantity", 0)
+    )
+    db.session.add(new_product)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Product created",
+        "product": {
+            "id": new_product.id,
+            "name": new_product.name,
+            "price": float(new_product.price),
+            "stock_quantity": new_product.stock_quantity
+        }
+    }), 201    
