@@ -14,7 +14,7 @@ def signup():
     data = request.get_json() or {}
 
     name = data.get("name")
-    email = data.get("email")
+    email = data.get("email","").strip().lower()  # normalize email to lowercase
     password = data.get("password")
 
     # basic validation — reject if any required field is missing
@@ -51,7 +51,7 @@ def signup():
 def login():
     data = request.get_json() or {}
 
-    email = data.get("email")
+    email = data.get("email","").strip().lower()  # normalize email to lowercase   
     password = data.get("password")
 
     if not email or not password:

@@ -3,6 +3,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.utils.admin_required import admin_required
+from sqlalchemy import func
+from app.models.product import Product
+
 
 from app.models import db
 from app.models.cart import Cart, CartItem
@@ -282,4 +285,51 @@ def update_order_status(order_id):
             "id": order.id,
             "status": order.status
         }
-    }), 200    
+    }), 200 
+
+
+@orders_bp.route("/admin/stats", methods=["GET"])
+@admin_required
+def admin_stats():
+    total_orders = Order.query.count()
+
+    # Total revenue (sum of all order totals)
+    revenue_result = db.session.query(func.coalesce(func.sum(Order.total), 0)).scalar()
+    total_revenue = float(revenue_result)
+
+    # Orders by status
+    status_counts = (
+        db.session.query(Order.status, func.count(Order.id))
+        .group_by(Order.status)
+        .all()
+    )
+    orders_by_status = {status: count for status, count in status_counts}
+
+    # Low stock products (stock < 10)
+    low_stock_count = Product.query.filter(Product.stock_quantity < 10).count()
+
+    # Recent orders (last 5)
+    recent_orders = (
+        Order.query
+        .order_by(Order.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    return jsonify({
+        "total_orders": total_orders,
+        "total_revenue": total_revenue,
+        "orders_by_status": orders_by_status,
+        "low_stock_count": low_stock_count,
+        "recent_orders": [
+            {
+                "id": o.id,
+                "customer_name": o.user.name,
+                "total": float(o.total),
+                "status": o.status,
+                "created_at": o.created_at.isoformat(),
+            }
+            for o in recent_orders
+        ],
+    }), 200
+

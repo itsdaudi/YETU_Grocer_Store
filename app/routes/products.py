@@ -130,4 +130,85 @@ def create_product():
             "price": float(new_product.price),
             "stock_quantity": new_product.stock_quantity
         }
-    }), 201    
+    }), 201 
+
+@products_bp.route("/admin/products", methods=["GET"])
+@admin_required
+def get_admin_products():
+    products = Product.query.order_by(Product.id.desc()).all()
+
+    return jsonify({
+        "products": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "category_id": p.category_id,
+                "category": p.category.name if p.category else None,
+                "price": float(p.price),
+                "sale_price": float(p.sale_price) if p.sale_price else None,
+                "unit": p.unit,
+                "image_url": p.image_url,
+                "description": p.description,
+                "nutrition_info": p.nutrition_info,
+                "stock_quantity": p.stock_quantity,
+            }
+            for p in products
+        ]
+    }), 200
+
+
+@products_bp.route("/admin/products/<int:product_id>", methods=["PUT"])
+@admin_required
+def update_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    data = request.get_json() or {}
+
+    if "name" in data:
+        product.name = data["name"]
+    if "category_id" in data:
+        category = Category.query.get(data["category_id"])
+        if not category:
+            return jsonify({"error": "Category not found"}), 404
+        product.category_id = data["category_id"]
+    if "price" in data:
+        product.price = data["price"]
+    if "sale_price" in data:
+        product.sale_price = data["sale_price"]  # can be null
+    if "unit" in data:
+        product.unit = data["unit"]
+    if "image_url" in data:
+        product.image_url = data["image_url"]
+    if "description" in data:
+        product.description = data["description"]
+    if "nutrition_info" in data:
+        product.nutrition_info = data["nutrition_info"]
+    if "stock_quantity" in data:
+        product.stock_quantity = data["stock_quantity"]
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Product updated",
+        "product": {
+            "id": product.id,
+            "name": product.name,
+            "price": float(product.price),
+            "stock_quantity": product.stock_quantity,
+        }
+    }), 200
+
+
+@products_bp.route("/admin/products/<int:product_id>", methods=["DELETE"])
+@admin_required
+def delete_product(product_id):
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    db.session.delete(product)
+    db.session.commit()
+
+    return jsonify({"message": "Product deleted"}), 200   
