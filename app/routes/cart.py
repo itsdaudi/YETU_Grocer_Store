@@ -11,8 +11,8 @@ from app.models.product import Product
 
 cart_bp = Blueprint("cart", __name__, url_prefix="/api/cart")
 
-FREE_DELIVERY_THRESHOLD = 25.00
-DELIVERY_FEE = 3.99
+FREE_DELIVERY_THRESHOLD = 2500.00 #free del above 2500
+DELIVERY_FEE = 150.00
 
 
 def get_or_create_cart(user_id):
